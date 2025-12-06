@@ -1,0 +1,5 @@
+{
+  "name": "Ocora",
+  "description": "Advanced Neuro-Oncology Dashboard utilizing Soft Actor-Critic & MAML for personalized brain tumor segmentation, radiomics extraction, and digital twin treatment simulation.",
+  "requestFramePermissions": []
+}
