@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Upload, File, Check, Loader2, AlertCircle } from 'lucide-react';
-import { fetchRadiomics } from "../api";   // ⬅️ IMPORTANT: your backend client
+import { fetchRadiomics } from "../api";
 
 interface UploadSectionProps {
   onUploadComplete: (data: {
@@ -42,16 +43,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onUploadComplete }) => {
     }
   };
 
-  // 🔥 REAL UPLOAD → BACKEND → RADIOMICS → FEATURE VECTOR
   const processUpload = async (file: File) => {
     setCurrentFile(file);
     setIsUploading(true);
 
     try {
-      // ⬅️ send file to your backend
+      // If backend is down, this now returns MOCK data instead of throwing
       const result = await fetchRadiomics(file);
 
-      // result = { radiomics: {...}, vector: [...] }
       setIsUploading(false);
       setUploadSuccess(true);
 
@@ -61,12 +60,13 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onUploadComplete }) => {
           radiomics: result.radiomics,
           featureVector: result.vector
         });
-      }, 800);
+      }, 1000);
 
     } catch (error) {
-      console.error("Upload failed:", error);
+      // This catch block should rarely trigger now, unless there is a critical app error
+      console.error("Critical Upload Error:", error);
       setIsUploading(false);
-      alert("Radiomics extraction failed. Check backend.");
+      alert("An unexpected error occurred processing the file.");
     }
   };
 

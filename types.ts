@@ -11,6 +11,24 @@ export interface RadiomicsData {
   actualValue: string;
 }
 
+export interface TumorPhenotype {
+  volumeCm3: number;
+  midlineShiftMm: number;
+  enhancingPercentage: number;
+  nonEnhancingPercentage: number;
+  edemaVolumeCm3: number;
+  necrosisVolumeCm3: number;
+  resectabilityScore: number; // 0-100
+}
+
+export interface AnalysisAudit {
+  analysisTimestamp: string;
+  modelVersion: string;
+  segmentationConfidence: number; // 0-1
+  predictionConfidence: number; // 0-1
+  executionId: string;
+}
+
 export interface PatientData {
   id: string;
   name: string;
@@ -18,16 +36,21 @@ export interface PatientData {
   gender: 'M' | 'F';
   diagnosis: string;
   scanDate: string;
+  tumorGrade?: 'HGG' | 'LGG';
+  resectability?: 'Resectable' | 'Non-Resectable';
   radiomics?: RadiomicsData[];
+  phenotype?: TumorPhenotype;
+  audit?: AnalysisAudit;
   featureVector?: number[];
+  imageUrl?: string; // Base64 string of the processed slice
 }
 
 export interface TreatmentPlan {
   name: string;
   probability: number;
-  description: string;
+  description: string; // Bullet points separated by newline
   sideEffects: string[];
-  survivalRateIncrease: number;
+  expectedSurvival: number; // in months
 }
 
 export interface TwinSimulationStep {

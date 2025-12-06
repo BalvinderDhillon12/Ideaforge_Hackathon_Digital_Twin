@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { SimulationScenario, PatientData, TreatmentPlan, TwinSimulationStep } from '../types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Play, Pause, RefreshCw, MessageSquare, Dna, Send, Loader2 } from 'lucide-react';
+import { Play, Pause, RefreshCw, MessageSquare, Dna, Send, Loader2, ChevronDown } from 'lucide-react';
 import { chatWithTwin } from '../services/geminiService';
 import { fetchSimulation } from '../api';
 
@@ -32,17 +33,26 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ patient, selectedTreatment })
   ]);
   const [isChatting, setIsChatting] = useState(false);
   
+  // Internal selection state for comparison (defaults to passed prop)
+  const [viewingTreatmentName, setViewingTreatmentName] = useState(selectedTreatment.name);
+  
   // Simulation Data State
   const [simData, setSimData] = useState<TwinSimulationStep[]>(MOCK_DATA);
   const [isLoadingSim, setIsLoadingSim] = useState(false);
 
+  // Available therapies for comparison
+  const therapies = ["Radiotherapy", "Chemoradiation (TMZ + RT)", "TMZ Chemotherapy", "No Treatment"];
+
   // FETCH SIMULATION FROM BACKEND
   useEffect(() => {
     async function getSim() {
-      if (patient.featureVector && selectedTreatment) {
+      if (patient.featureVector) {
         setIsLoadingSim(true);
+        // Reset animation on new fetch
+        setCurrentStep(0);
+        setIsPlaying(false);
         try {
-           const result = await fetchSimulation(selectedTreatment.name, patient.featureVector);
+           const result = await fetchSimulation(viewingTreatmentName, patient.featureVector);
            if (result && result.trajectory) {
              setSimData(result.trajectory);
            } else if (result && Array.isArray(result)) {
@@ -57,7 +67,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ patient, selectedTreatment })
       }
     }
     getSim();
-  }, [selectedTreatment, patient.featureVector]);
+  }, [viewingTreatmentName, patient.featureVector]);
 
   useEffect(() => {
     let interval: any;
@@ -103,9 +113,20 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ patient, selectedTreatment })
             <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
               <Dna className="text-cyan-400" /> Digital Twin Simulation
             </h2>
-            <div className="flex gap-2 text-slate-400 mt-1 text-sm">
-               <span>Simulating protocol:</span>
-               <span className="text-cyan-400 font-medium">{selectedTreatment.name}</span>
+            <div className="flex items-center gap-3 mt-2">
+               <span className="text-slate-400 text-sm">Simulating protocol:</span>
+               <div className="relative">
+                 <select 
+                   value={viewingTreatmentName}
+                   onChange={(e) => setViewingTreatmentName(e.target.value)}
+                   className="appearance-none bg-slate-800 border border-slate-700 text-cyan-400 text-sm font-medium rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:border-cyan-500"
+                 >
+                   {therapies.map(t => (
+                     <option key={t} value={t}>{t}</option>
+                   ))}
+                 </select>
+                 <ChevronDown className="w-4 h-4 text-slate-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+               </div>
             </div>
          </div>
          <div className="flex gap-2">
@@ -170,7 +191,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ patient, selectedTreatment })
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="month" stroke="#94a3b8" />
+                <XAxis dataKey="month" stroke="#94a3b8" label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis stroke="#94a3b8" />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155' }}
@@ -182,6 +203,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ patient, selectedTreatment })
                   stroke="#ef4444" 
                   fillOpacity={1} 
                   fill="url(#colorVol)" 
+                  animationDuration={500}
                 />
               </AreaChart>
             </ResponsiveContainer>

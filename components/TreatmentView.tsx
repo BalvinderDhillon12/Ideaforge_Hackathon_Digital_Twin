@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { TreatmentPlan, PatientData, RadiomicsData } from '../types';
 import { generateClinicalReasoning } from '../services/geminiService';
 import { fetchPolicy } from '../api';
-import { CheckCircle, AlertTriangle, BrainCircuit, Loader2, Info } from 'lucide-react';
+import { CheckCircle, AlertTriangle, BrainCircuit, Loader2, Info, HeartPulse } from 'lucide-react';
 
 interface TreatmentViewProps {
   treatments: TreatmentPlan[];
@@ -89,11 +90,11 @@ const TreatmentView: React.FC<TreatmentViewProps> = ({
               </div>
               <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden mb-2">
                 <div 
-                  className={`h-full ${plan.probability > 0.8 ? 'bg-green-500' : 'bg-yellow-500'}`} 
+                  className={`h-full ${plan.probability > 0.3 ? 'bg-green-500' : 'bg-yellow-500'}`} 
                   style={{ width: `${plan.probability * 100}%` }}
                 />
               </div>
-              <p className="text-xs text-slate-400 line-clamp-2">{plan.description}</p>
+              <p className="text-xs text-slate-400 whitespace-pre-line leading-relaxed">{plan.description}</p>
             </button>
           ))}
           
@@ -138,12 +139,12 @@ const TreatmentView: React.FC<TreatmentViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
               <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" /> Projected Benefits
+                <HeartPulse className="w-4 h-4 text-green-500" /> Expected Survival
               </h4>
               <div className="text-3xl font-bold text-slate-100 mb-1">
-                +{selectedPlan.survivalRateIncrease}%
+                {selectedPlan.expectedSurvival.toFixed(1)} Months
               </div>
-              <p className="text-sm text-slate-500">Estimated increase in 5-year survival rate compared to standard of care.</p>
+              <p className="text-sm text-slate-500">Based on historical outcomes of similar radiomic profiles.</p>
             </div>
 
              <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
